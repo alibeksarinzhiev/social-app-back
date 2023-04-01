@@ -1,39 +1,43 @@
 import User from '../models/User.js'
-import bcryptjs from 'bcryptjs'
+import bscrypt from 'bcryptjs'
+
 import jwt from 'jsonwebtoken'
 
 
 
 
-export const register = async (req,res)=>{
+export const  register= async (req,res)=>{
     try {
         const {username,password} = req.body
 
-        const used = await User.findOne({username})
-
-        if (used){
+        const isUsed = await User.findOne({username})
+        if (isUsed){
             return res.json({
-                message:'данный пользователь занят'
+                message:'данный user уже занят'
             })
         }
-        const salt = bcryptjs.genSaltSync(10)
-        const hash = bcryptjs.hash(password,salt)
+        const salt = bscrypt.genSaltSync(10)
+        const hash = bscrypt.hashSync(password,salt)
 
         const newUser = new User({
             username,
             password:hash,
         })
+        const token=jwt.sign(
+            {
+                id:newUser._id,
+            },
+            process.env.JWT_SECRET,
+            {expiresIn: '30d'},
+        )
         await newUser.save()
-
         res.json({
             newUser,
-            message:'РЕгистрация прошла успешно'
+            token,
+            message:'регистрация прошла успешна'
         })
 
-
-    }catch (error){
-        res.json({message:'ошибка при создании пользователя'})
-    }
+    }catch (error){}
 }
 
 export const login = async (req,res)=>{
@@ -46,7 +50,7 @@ export const login = async (req,res)=>{
                 message:'неверное имя пользателя'
             })
         }
-        const isPasswordTrue = await bcryptjs.compare(password,user.password)
+        const isPasswordTrue = await bscrypt.compare(password,user.password)
 
         if (!isPasswordTrue){
             return res.json({
@@ -75,6 +79,26 @@ export const login = async (req,res)=>{
 
 export const getMe = async (req,res)=>{
     try {
+        const user = await User.findById(req.userId)
+
+        if (!user){
+            return res.json({
+                message:'такого юзера не сущ'
+            })
+        }
+        const token=jwt.sign({
+                id:user._id
+            },
+            process.env.JWT_SECRET,
+            {
+                expiresIn: '30d'
+            }
+        )
+        res.json({
+            token,
+            user,
+            message:'вы успешно вошли на сайт'
+        })
 
     }catch (error){
         console.log(error)

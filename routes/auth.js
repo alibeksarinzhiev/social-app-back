@@ -1,7 +1,8 @@
 import { Router } from "express";
-import {getMe, login, register} from "../controlers/auth";
+import {getMe, login, register} from "../controlers/auth.js";
+import {checkAuth} from "../utils/checkAuth.js";
 
-const router = Router();
+const router = new Router()
 // РЕГИСТРАЦИЯ
 // http://localhost:8080/auth/register
 
@@ -13,6 +14,6 @@ router.post('/login',login)
 
 // ПОЛУЧЕНИЕ ПОЛЬЗОВАТЕЛЯ
 //http://localhost:8080/auth/get
-router.get('/me',getMe)
+router.get('/me',checkAuth,getMe)
 
-export default router
+export default router;

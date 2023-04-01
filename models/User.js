@@ -13,10 +13,10 @@ const UserSchema = new mongoose.Schema({
     posts:[
         {
             type:mongoose.Schema.Types.ObjectId,
-            ref:"POST",
-        }
-    ]
+            ref:"Post",
+        },
+    ],
 },
     {timestamps:true}
 )
-export default UserSchema.model('User',UserSchema)
+export default mongoose.model('User',UserSchema)
